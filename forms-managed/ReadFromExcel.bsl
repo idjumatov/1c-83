@@ -1,3 +1,4 @@
+
 ///*
 //* Copyright (c) 2022, Ilham Djumatov. All rights reserved.
 //* Copyrights licensed under the GNU GPLv3.
@@ -16,11 +17,11 @@ Procedure OnCreateAtServer(Cancel, StandardProcessing)
     
     // Реквизиты формы
     AttributesToAdd = New Array;
-    AttributesToAdd.Добавить(New FormAttribute("FirstRow",     New TypeDescription("Number", New NumberQualifiers(10, 0)), ""));
-    AttributesToAdd.Добавить(New FormAttribute("FirstCol",     New TypeDescription("Number", New NumberQualifiers(10, 0)), ""));
-    AttributesToAdd.Добавить(New FormAttribute("LastRow",      New TypeDescription("Number", New NumberQualifiers(10, 0)), ""));
-    AttributesToAdd.Добавить(New FormAttribute("LastCol",      New TypeDescription("Number", New NumberQualifiers(10, 0)), ""));
-    AttributesToAdd.Добавить(New FormAttribute("List",         New TypeDescription("ValueList"), ""));
+    AttributesToAdd.Add(New FormAttribute("FirstRow",     New TypeDescription("Number", New NumberQualifiers(10, 0)), ""));
+    AttributesToAdd.Add(New FormAttribute("FirstCol",     New TypeDescription("Number", New NumberQualifiers(10, 0)), ""));
+    AttributesToAdd.Add(New FormAttribute("LastRow",      New TypeDescription("Number", New NumberQualifiers(10, 0)), ""));
+    AttributesToAdd.Add(New FormAttribute("LastCol",      New TypeDescription("Number", New NumberQualifiers(10, 0)), ""));
+    AttributesToAdd.Add(New FormAttribute("List",         New TypeDescription("ValueList"), ""));
     ChangeAttributes(AttributesToAdd);
     
     Parameters.Свойство("FirstRow",     ThisObject["FirstRow"]);
@@ -36,19 +37,19 @@ Procedure OnCreateAtServer(Cancel, StandardProcessing)
         ThisObject["FirstCol"] = 1;
     EndIf;
     
-    ThisForm.CommandBar.Visible = Ложь;
+    ThisForm.CommandBar.Visible = False;
     ThisForm.Title = "Выберите лист";
-    ThisForm.AutoTitle = Ложь;
+    ThisForm.AutoTitle = False;
     ThisForm.WindowOpeningMode = FormWindowOpeningMode.Independent;
     
-    Item = Items.Добавить("List", Type("FormTable"));
-    Item.ПутьКДанным = "List";
-    Item.ТолькоПросмотр = True;
-    Item.КоманднаяПанель.Visible = Ложь;
+    Item = Items.Add("List", Type("FormTable"));
+    Item.DataPath = "List";
+    Item.ReadOnly = True;
+    Item.CommandBar.Visible = False;
     Item.SetAction("Selection", "ListSelection");
     
-    Item = Items.Добавить("ListValue", Type("FormField"), Items["List"]);
-    Item.ПутьКДанным = "List.Value";
+    Item = Items.Add("ListValue", Type("FormField"), Items["List"]);
+    Item.DataPath = "List.Value";
     
 EndProcedure
 
@@ -121,7 +122,7 @@ Procedure OnOpen(Cancel)
     Dialog.Title = "Выберите файл";
     Dialog.FullFileName = "";
     Dialog.Filter = "Excel документ (*.xls/*.xlsx)|*.xls?";
-    Dialog.Multiselect = Ложь;
+    Dialog.Multiselect = False;
     Dialog.Directory = "С:\";
     
     Notify = New NotifyDescription("ProcessFileSelection", ThisObject);
@@ -138,9 +139,9 @@ Procedure OnOpen(Cancel)
         Cancel = True;
     EndTry;
     
-    Если Dialog.SelectedFiles.Count() = 0 Тогда 
+    If Dialog.SelectedFiles.Count() = 0 Then 
         Cancel = True;
-    КонецЕсли;
+    EndIf;
     
 EndProcedure
 
@@ -152,9 +153,9 @@ Procedure ProcessFileSelection(Files, Params) Export
             Notify = New NotifyDescription("ProcessFile", ThisObject, File);
             File.НачатьПроверкуСуществования(Notify);
         EndDo;
-    Иначе 
-        Закрыть();
-    КонецЕсли;
+    Else 
+        Close();
+    EndIf;
 EndProcedure
 
 &AtClient
@@ -189,9 +190,9 @@ Procedure ProcessFile(Exists, File) Export
             Return;
         EndTry;
         
-        Для SheetNumber = 1 По Book.WorkSheets.Count Цикл
+        For SheetNumber = 1 To Book.WorkSheets.Count Do
             ThisObject["List"].Add(SheetNumber, Book.WorkSheets(SheetNumber).Name);
-        КонецЦикла;
+        EndDo;
     Else 
         ShowMessageBox(, "Файл не найден: " + File.FullName);
         Close();
